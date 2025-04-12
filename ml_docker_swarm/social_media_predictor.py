@@ -9,6 +9,7 @@ import math
 import random
 import argparse,logging
 
+import pandas as pd
 import mxnet as mx
 import xgboost as xgb
 import numpy as np
@@ -83,25 +84,55 @@ def _load_model(args, rank=0):
 	logging.info('Loaded model %s_%04d.params', model_prefix, args.load_epoch)
 	return (sym, arg_params, aux_params)
 
+# def _compose_sys_data_channel(sys_data, field, batch_size):
+# 	global Services
+# 	global CnnTimeSteps
+
+# 	print("Before:", np.array(sys_data[Services[0]][field]))
+
+# 	for i, service in enumerate(Services):
+# 		assert len(sys_data[service][field]) == CnnTimeSteps
+# 		if i == 0:
+# 			data = np.array(sys_data[service][field])
+# 		else:
+# 			data = np.vstack((data, np.array(sys_data[service][field])))
+
+# 	data = data.reshape([1, data.shape[0], data.shape[1]])
+# 	for i in range(0, batch_size):
+# 		if i == 0:
+# 			channel_data = np.array(data)
+# 		else:
+# 			channel_data = np.vstack((channel_data, data))
+# 	channel_data = channel_data.reshape([channel_data.shape[0], 1, channel_data.shape[1], channel_data.shape[2]])
+
+# 	print("After:", channel_data)
+# 	print("Data type:", channel_data.dtype)
+# 	print("Shape:", channel_data.shape)
+
+# 	return channel_data
 def _compose_sys_data_channel(sys_data, field, batch_size):
-	global Services
-	global CnnTimeSteps
+    global Services
+    global CnnTimeSteps
 
-	for i, service in enumerate(Services):
-		assert len(sys_data[service][field]) == CnnTimeSteps
-		if i == 0:
-			data = np.array(sys_data[service][field])
-		else:
-			data = np.vstack((data, np.array(sys_data[service][field])))
+    for i, service in enumerate(Services):
+        assert len(sys_data[service][field]) == CnnTimeSteps
+        # Convert each list to a float64 array
+        if i == 0:
+            data = np.array(sys_data[service][field], dtype=np.float64)
+        else:
+            data = np.vstack((data, np.array(sys_data[service][field], dtype=np.float64)))
+    
+    data = data.reshape([1, data.shape[0], data.shape[1]])
+    
+    for i in range(0, batch_size):
+        if i == 0:
+            channel_data = np.array(data, dtype=np.float64)
+        else:
+            channel_data = np.vstack((channel_data, data))
+    
+    channel_data = channel_data.reshape([channel_data.shape[0], 1, channel_data.shape[1], channel_data.shape[2]])
+    return channel_data
 
-	data = data.reshape([1, data.shape[0], data.shape[1]])
-	for i in range(0, batch_size):
-		if i == 0:
-			channel_data = np.array(data)
-		else:
-			channel_data = np.vstack((channel_data, data))
-	channel_data = channel_data.reshape([channel_data.shape[0], 1, channel_data.shape[1], channel_data.shape[2]])
-	return channel_data
 
 def _predict(info):
 	global Services
@@ -115,6 +146,7 @@ def _predict(info):
 	raw_next_info = info['next_info']
 	batch_size = len(raw_next_info)
 
+
 	# rps
 	rps_data = _compose_sys_data_channel(raw_sys_data, 'rps', batch_size)
 
@@ -125,11 +157,11 @@ def _predict(info):
 	cpu_limit_data = _compose_sys_data_channel(raw_sys_data, 'cpu_limit', batch_size)
 
 	# cpu usage
+	
 	cpu_usage_mean_data = _compose_sys_data_channel(raw_sys_data, 'cpu_usage_mean', batch_size)
 	# cpu_usage_min_data  = _compose_sys_data_channel(raw_sys_data, 'cpu_usage_min', batch_size)
 	# cpu_usage_max_data  = _compose_sys_data_channel(raw_sys_data, 'cpu_usage_max', batch_size)
 	# cpu_usage_std_data  = _compose_sys_data_channel(raw_sys_data, 'cpu_usage_std', batch_size)   # std deviation
-
 	# memory
 	rss_mean_data = _compose_sys_data_channel(raw_sys_data, 'rss_mean', batch_size)
 	# rss_min_data  = _compose_sys_data_channel(raw_sys_data, 'rss_min', batch_size)
@@ -222,9 +254,7 @@ def _predict(info):
 		 rss_mean_data,
 		 cache_mem_mean_data), 
 		axis=1)
-
 	logging.info('sys_data.shape = ' + str(sys_data.shape))
-
 	#-------------------------- e2e_lat --------------------------#
 	for key in ['90.0', '95.0', '98.0', '99.0', '99.9']:
 		assert len(raw_sys_data['e2e_lat'][key]) == CnnTimeSteps
@@ -330,7 +360,7 @@ def _predict(info):
 
 	return predict
 
-def test():
+def test(rps : int, pod_count: dict, cpu_usage_means : dict):
 	global Model
 	global InternalSysState
 	global BoostTree
@@ -340,11 +370,12 @@ def test():
 
 	# load model for prediction
 	kv = mx.kvstore.create(args.kv_store)
-	devs = mx.cpu() if args.gpus is None else [mx.gpu(int(i)) for i in args.gpus.split(',')]
+	devs = mx.cpu() #if args.gpus is None else [mx.gpu(int(i)) for i in args.gpus.split(',')]
 	load_params = _load_model(args, kv.rank)
 	sym = load_params[0]
+	#print('[DEBUG] Sym Args\n\n'  + str(sym.list_arguments()))
+	#print('[DEBUG] Cnn Time Steps\n\n'  + str(CnnTimeSteps))
 	all_layers = sym.get_internals()
-
 	#---------------- cnn -----------------#
 	Model   = all_layers['latency_output']
 	Model   = mx.mod.Module(
@@ -383,24 +414,24 @@ def test():
 	InternalSysState.set_params(load_params[1], load_params[2], allow_missing=True, allow_extra=True)
 
 	BoostTree = xgb.Booster()  # init model
-	print 'load ', args.xgb_prefix + str(XgbLookForward) + '.model'
+	print('load ', args.xgb_prefix + str(XgbLookForward) + '.model')
 	BoostTree.load_model(args.xgb_prefix + str(XgbLookForward) + '.model')  # load data
 
 	info = {}
 	sys_data = {}
 	sys_data['e2e_lat']  = {}
 	# info['rps_next'] = 2000
-	for i, key in enumerate(['90.0', '95.0', '98.0', '99.0', '99.9']):
-		sys_data['e2e_lat'][key] = [1.0 + i/10.0] * CnnTimeSteps
+	for i, key in enumerate(['90.0', '95.0', '98.0', '99.0', '99.9']): # add in real e2e latency data
+		sys_data['e2e_lat'][key] = [1.0 + 30.0] * CnnTimeSteps
 
 	for service in Services:
 		sys_data[service] = {}
-		sys_data[service]['rps'] =  [50] * CnnTimeSteps
-		sys_data[service]['cpu_limit'] = [12] * CnnTimeSteps
-		sys_data[service]['replica'] = [10] * CnnTimeSteps
-		sys_data[service]['cpu_usage_mean'] = [5.0] * CnnTimeSteps
-		sys_data[service]['rss_mean']  = [1.0]  * CnnTimeSteps
-		sys_data[service]['cache_mem_mean'] = [0.0] * CnnTimeSteps
+		sys_data[service]['rps'] =  [rps] * CnnTimeSteps
+		sys_data[service]['cpu_limit'] = [2 * pod_count[service] if service in pod_count.keys() else 1] * CnnTimeSteps
+		sys_data[service]['replica'] = [pod_count[service] if service in pod_count.keys() else 1] * CnnTimeSteps
+		sys_data[service]['cpu_usage_mean'] = [cpu_usage_means[service] if service in cpu_usage_means.keys() else 1] * CnnTimeSteps
+		sys_data[service]['rss_mean']  = [0]  * CnnTimeSteps
+		sys_data[service]['cache_mem_mean'] = [0] * CnnTimeSteps
 
 	info['sys_data'] = sys_data
 	next_info = []
@@ -409,8 +440,8 @@ def test():
 		proposal = {}
 		for service in Services:
 			proposal[service] = {}
-			proposal[service]['cpus'] = 12
-			proposal[service]['rps'] = 50
+			proposal[service]['cpus'] = 2 * pod_count[service] if service in pod_count.keys() else 1
+			proposal[service]['rps'] = rps
 		next_info.append(proposal)
 		# info[service]['read_req_num_next']  = 2000
 		# info[service]['write_req_num_next'] = 300
@@ -418,8 +449,28 @@ def test():
 
 	t_s = time.time()
 	pred = _predict(info)
-	print 'inf time: ', time.time() - t_s
-	# print pred
+	return pred
+
+
+def load_usage_and_pods_from_csv(csv_path, rps):
+    df = pd.read_csv(csv_path)
+
+    # Filter the row for the given load value
+    row = df[df['load'] == rps].iloc[0]
+
+    usage_dict = {}
+    pods_dict = {}
+
+    for col in df.columns:
+        if col == 'load':
+            continue
+        value = eval(row[col])  # assuming the value is a stringified tuple like "(0.01, 1)"
+        usage_dict[col] = value[0]
+        pods_dict[col] = value[1]
+
+    return usage_dict, pods_dict
+
+
 
 def main():
 	global Model
@@ -530,9 +581,101 @@ def main():
 	host_sock.close()
 	local_serv_sock.close()
   
+SERVICE_TIERS = {
+    "compose-post-redis": "Caching & DB",
+    "compose-post-service": "Business Logic",
+    "home-timeline-redis": "Caching & DB",
+    "home-timeline-service": "Business Logic",
+    "nginx-thrift": "Frontend",
+    "post-storage-memcached": "Caching & DB",
+    "post-storage-mongodb": "Caching & DB",
+    "post-storage-service": "Business Logic",
+    "social-graph-mongodb": "Caching & DB",
+    "social-graph-redis": "Caching & DB",
+    "social-graph-service": "Business Logic",
+    "text-service": "Business Logic",
+    "text-filter-service": "Business Logic",
+    "unique-id-service": "Business Logic",
+    "url-shorten-service": "Business Logic",
+    "media-service": "Business Logic",
+    "media-filter-service": "Business Logic",
+    "user-mention-service": "Business Logic",
+    "user-memcached": "Caching & DB",
+    "user-mongodb": "Caching & DB",
+    "user-service": "Business Logic",
+    "user-timeline-mongodb": "Caching & DB",
+    "user-timeline-redis": "Caching & DB",
+    "user-timeline-service": "Business Logic",
+    "write-home-timeline-service": "Business Logic",
+    "write-home-timeline-rabbitmq": "Caching & DB",
+    "write-user-timeline-service": "Business Logic",
+    "write-user-timeline-rabbitmq": "Caching & DB"
+}
+TIER_LEVEL_LIST = ["Business Logic", "Caching & DB", "Frontend"]
+
+def create_and_save_deployment_config(load, best_action_replicas_dict):
+
+	k8s_json: dict = None
+	with open("k8s_noservice.json", "r") as f:
+		k8s_json = json.loads(f.read())
+
+	#total_replicas = sum([item for item in best_action_replicas_dict.values()])
+
+	for microservice, count in best_action_replicas_dict.items():
+		# create a new dict with the same keys as the json file
+		new_dict = {
+			"name": microservice,
+			"namespace": "socialnetwork",
+			"replicas": int(count),
+			"resources": {
+				"requests": {"cpu": "2", "memory": "2Gi"},
+				"limits": {"cpu": "2", "memory": "2Gi"},
+			},
+		}
+		# append the dict to the deployments key
+		k8s_json["deployments"].append(new_dict)
+
+	# write the json file to k8s.json
+	with open(f"sinan_deployment_configs/load_{load}_config.json", "w") as f:
+		f.write(json.dumps(k8s_json, indent=4))
+	
+
 if __name__ == "__main__":	
 	logging.basicConfig(level=logging.INFO,
 		format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-	main()
-	# test()
+	QoS_PROB_UPPER_THRESHOLD = 0.8
+	QoS_LATENCY = 200 #ms
+	for load in range (25,701,25): 
+		service_cpu_dict, service_replicas_dict = load_usage_and_pods_from_csv('step_25_ctrl_cpu_pod_tuple.csv', load)
+		e2e_latency, qos_prob = test(load, service_replicas_dict, service_cpu_dict)[0]
+
+		if qos_prob < QoS_PROB_UPPER_THRESHOLD and  e2e_latency < QoS_LATENCY:
+			print("No chance of a QoS violation @ ", load)
+			best_outcome = service_replicas_dict
+		else:
+			action_outcomes = []
+			for i, tier in enumerate(TIER_LEVEL_LIST):
+				updated_replica_dict = service_replicas_dict
+				total_pods_added = 0
+				# increment all pod counts of type tier by 1
+				for key in service_replicas_dict.keys():
+					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
+						updated_replica_dict[key] = updated_replica_dict[key] + 1
+						total_pods_added = total_pods_added + 1
+
+				updated_e2e_latency, updated_qos_prob = test(load, updated_replica_dict, service_cpu_dict)[0] #cpu usage is not 100% accurate
+				action_outcomes.append((tier, total_pods_added ,updated_e2e_latency, updated_qos_prob, updated_replica_dict))
+
+			# determine the best action
+			ranked_outcomes = sorted(action_outcomes, key= lambda x: (x[3], x[1], x[2]))
+			best_outcome = ranked_outcomes[0][4]
+
+		# create a deployment config for this file
+		create_and_save_deployment_config(load, best_outcome)
+
+
+
+
+
+
