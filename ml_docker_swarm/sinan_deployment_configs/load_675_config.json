@@ -228,7 +228,7 @@
         {
             "name": "compose-post-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -243,7 +243,7 @@
         {
             "name": "home-timeline-redis",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -258,7 +258,7 @@
         {
             "name": "home-timeline-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -333,7 +333,7 @@
         {
             "name": "media-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -348,7 +348,7 @@
         {
             "name": "nginx-thrift",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -363,7 +363,7 @@
         {
             "name": "post-storage-memcached",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -378,7 +378,7 @@
         {
             "name": "post-storage-mongodb",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -393,7 +393,7 @@
         {
             "name": "post-storage-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -408,7 +408,7 @@
         {
             "name": "social-graph-mongodb",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -423,7 +423,7 @@
         {
             "name": "social-graph-redis",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -438,7 +438,7 @@
         {
             "name": "social-graph-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -453,7 +453,7 @@
         {
             "name": "text-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -468,7 +468,7 @@
         {
             "name": "unique-id-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -513,7 +513,7 @@
         {
             "name": "url-shorten-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -528,7 +528,7 @@
         {
             "name": "user-memcached",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -543,7 +543,7 @@
         {
             "name": "user-mention-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -558,7 +558,7 @@
         {
             "name": "user-mongodb",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -573,7 +573,7 @@
         {
             "name": "user-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -588,7 +588,7 @@
         {
             "name": "user-timeline-mongodb",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -603,7 +603,7 @@
         {
             "name": "user-timeline-redis",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -618,7 +618,7 @@
         {
             "name": "user-timeline-service",
             "namespace": "socialnetwork",
-            "replicas": 7,
+            "replicas": 3,
             "resources": {
                 "requests": {
                     "cpu": "2",
