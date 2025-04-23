@@ -403,24 +403,6 @@
             }
         },
         {
-<<<<<<< Updated upstream
-            "name": "post-storage-service",
-            "namespace": "socialnetwork",
-            "replicas": 1,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-=======
->>>>>>> Stashed changes
             "name": "social-graph-mongodb",
             "namespace": "socialnetwork",
             "replicas": 1,

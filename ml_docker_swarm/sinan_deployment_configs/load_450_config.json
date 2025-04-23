@@ -59,26 +59,7 @@
                     "memory": "2.0Gi"
                 }
             }
-        },
-<<<<<<< Updated upstream
-        {
-            "name": "nginx-thrift",
-            "namespace": "socialnetwork",
-            "replicas": 1,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2.0Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2.0Gi"
-                }
-            }
-        },
-=======
-        
->>>>>>> Stashed changes
+        },    
         {
             "name": "post-storage-memcached",
             "namespace": "socialnetwork",
