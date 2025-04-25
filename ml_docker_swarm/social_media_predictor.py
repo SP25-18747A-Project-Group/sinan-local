@@ -15,6 +15,9 @@ import xgboost as xgb
 import numpy as np
 from importlib import import_module
 
+# replica count gen
+updated_replica_dict = {}
+
 # ml parameters
 Model = None
 InternalSysState = None
@@ -81,33 +84,9 @@ def _load_model(args, rank=0):
 		model_prefix += "-%d" % (rank)
 	sym, arg_params, aux_params = mx.model.load_checkpoint(
 		model_prefix, args.load_epoch)
-	logging.info('Loaded model %s_%04d.params', model_prefix, args.load_epoch)
+	#logging.info('Loaded model %s_%04d.params', model_prefix, args.load_epoch)
 	return (sym, arg_params, aux_params)
 
-# def _compose_sys_data_channel(sys_data, field, batch_size):
-# 	global Services
-# 	global CnnTimeSteps
-
-# 	print("Before:", np.array(sys_data[Services[0]][field]))
-
-# 	for i, service in enumerate(Services):
-# 		assert len(sys_data[service][field]) == CnnTimeSteps
-# 		if i == 0:
-# 			data = np.array(sys_data[service][field])
-# 		else:
-# 			data = np.vstack((data, np.array(sys_data[service][field])))
-
-# 	data = data.reshape([1, data.shape[0], data.shape[1]])
-# 	for i in range(0, batch_size):
-# 		if i == 0:
-# 			channel_data = np.array(data)
-# 		else:
-# 			channel_data = np.vstack((channel_data, data))
-# 	channel_data = channel_data.reshape([channel_data.shape[0], 1, channel_data.shape[1], channel_data.shape[2]])
-
-# 	print("After:", channel_data)
-# 	print("Data type:", channel_data.dtype)
-# 	print("Shape:", channel_data.shape)
 
 # 	return channel_data
 def _compose_sys_data_channel(sys_data, field, batch_size):
@@ -169,81 +148,6 @@ def _predict(info):
 	# rss_std_data  = _compose_sys_data_channel(raw_sys_data, 'rss_std', batch_size)   # std deviation
 
 	cache_mem_mean_data = _compose_sys_data_channel(raw_sys_data, 'cache_mem_mean', batch_size)
-	# cache_mem_min_data  = _compose_sys_data_channel(raw_sys_data, 'cache_mem_min', batch_size)
-	# cache_mem_max_data  = _compose_sys_data_channel(raw_sys_data, 'cache_mem_max', batch_size)
-	# cache_mem_std_data  = _compose_sys_data_channel(raw_sys_data, 'cache_mem_std', batch_size)   # std deviation
-
-	#page_faults_mean_data = _compose_sys_data_channel(raw_sys_data, 'page_faults_mean', batch_size)
-	# page_faults_min_data  = _compose_sys_data_channel(raw_sys_data, 'page_faults_min', batch_size)
-	# page_faults_max_data  = _compose_sys_data_channel(raw_sys_data, 'page_faults_max', batch_size)
-	# page_faults_std_data  = _compose_sys_data_channel(raw_sys_data, 'page_faults_std', batch_size)   # std deviation
-
-	# network
-	#rx_packets_mean_data = _compose_sys_data_channel(raw_sys_data, 'rx_packets_mean', batch_size)
-	# rx_packets_min_data  = _compose_sys_data_channel(raw_sys_data, 'rx_packets_min', batch_size)
-	# rx_packets_max_data  = _compose_sys_data_channel(raw_sys_data, 'rx_packets_max', batch_size)
-	# rx_packets_std_data  = _compose_sys_data_channel(raw_sys_data, 'rx_packets_std', batch_size)   # std deviation
-
-	#rx_bytes_mean_data = _compose_sys_data_channel(raw_sys_data, 'rx_bytes_mean', batch_size)
-	# rx_bytes_min_data  = _compose_sys_data_channel(raw_sys_data, 'rx_bytes_min', batch_size)
-	# rx_bytes_max_data  = _compose_sys_data_channel(raw_sys_data, 'rx_bytes_max', batch_size)
-	# rx_bytes_std_data  = _compose_sys_data_channel(raw_sys_data, 'rx_bytes_std', batch_size)   # std deviation
-
-	#tx_packets_mean_data = _compose_sys_data_channel(raw_sys_data, 'tx_packets_mean', batch_size)
-	# tx_packets_min_data  = _compose_sys_data_channel(raw_sys_data, 'tx_packets_min', batch_size)
-	# tx_packets_max_data  = _compose_sys_data_channel(raw_sys_data, 'tx_packets_max', batch_size)
-	# tx_packets_std_data  = _compose_sys_data_channel(raw_sys_data, 'tx_packets_std', batch_size)   # std deviation
-
-	#tx_bytes_mean_data = _compose_sys_data_channel(raw_sys_data, 'tx_bytes_mean', batch_size)
-	# tx_bytes_min_data  = _compose_sys_data_channel(raw_sys_data, 'tx_bytes_min', batch_size)
-	# tx_bytes_max_data  = _compose_sys_data_channel(raw_sys_data, 'tx_bytes_max', batch_size)
-	# tx_bytes_std_data  = _compose_sys_data_channel(raw_sys_data, 'tx_bytes_std', batch_size)   # std deviation
-
-	# io
-	#io_bytes_mean_data = _compose_sys_data_channel(raw_sys_data, 'io_bytes_mean', batch_size)
-	# io_bytes_min_data  = _compose_sys_data_channel(raw_sys_data, 'io_bytes_min', batch_size)
-	# io_bytes_max_data  = _compose_sys_data_channel(raw_sys_data, 'io_bytes_max', batch_size)
-	# io_bytes_std_data  = _compose_sys_data_channel(raw_sys_data, 'io_bytes_std', batch_size)   # std deviation
-
-	#io_serviced_mean_data = _compose_sys_data_channel(raw_sys_data, 'io_serviced_mean', batch_size)
-	# io_serviced_min_data  = _compose_sys_data_channel(raw_sys_data, 'io_serviced_min', batch_size)
-	# io_serviced_max_data  = _compose_sys_data_channel(raw_sys_data, 'io_serviced_max', batch_size)
-	# io_serviced_std_data  = _compose_sys_data_channel(raw_sys_data, 'io_serviced_std', batch_size)   # std deviation
-
-	# shape: (batch_size, channel width, #servers, CnnTimeSteps)
-	# sys_data = np.concatenate(
-	# 	(rps_data, replica_data, cpu_limit_data,
-	# 	 cpu_usage_mean_data, cpu_usage_min_data, cpu_usage_max_data, cpu_usage_std_data, 
-	# 	 # network
-	# 	 rx_packets_mean_data, rx_packets_min_data, rx_packets_max_data, rx_packets_std_data,
-	# 	 rx_bytes_mean_data,   rx_bytes_min_data,   rx_bytes_max_data,   rx_bytes_std_data, 
-	# 	 tx_packets_mean_data, tx_packets_min_data, tx_packets_max_data, tx_packets_std_data,
-	# 	 tx_bytes_mean_data,   tx_bytes_min_data,   tx_bytes_max_data,   tx_bytes_std_data,
-	# 	 # memory
-	# 	 rss_mean_data, rss_min_data, rss_max_data, rss_std_data,
-	# 	 cache_mem_mean_data, cache_mem_min_data, cache_mem_max_data, cache_mem_std_data,
-	# 	 page_faults_mean_data, page_faults_min_data, page_faults_max_data, page_faults_std_data,
-	# 	 # io
-	# 	 io_serviced_mean_data, io_serviced_min_data, io_serviced_max_data, io_serviced_std_data,
-	# 	 io_bytes_mean_data, io_bytes_min_data, io_bytes_max_data, io_bytes_std_data), 
-	# 	axis=1)
-
-	# sys_data = np.concatenate(
-	# 	(rps_data, replica_data, cpu_limit_data,
-	# 	 cpu_usage_mean_data,
-	# 	 # network
-	# 	 rx_packets_mean_data,
-	# 	 rx_bytes_mean_data, 
-	# 	 tx_packets_mean_data,
-	# 	 tx_bytes_mean_data,
-	# 	 # memory
-	# 	 rss_mean_data,
-	# 	 cache_mem_mean_data,
-	# 	 page_faults_mean_data,
-	# 	 # io
-	# 	 io_serviced_mean_data,
-	# 	 io_bytes_mean_data), 
-	# 	axis=1)
 
 	sys_data = np.concatenate(
 		(rps_data, 
@@ -254,7 +158,7 @@ def _predict(info):
 		 rss_mean_data,
 		 cache_mem_mean_data), 
 		axis=1)
-	logging.info('sys_data.shape = ' + str(sys_data.shape))
+	#logging.info('sys_data.shape = ' + str(sys_data.shape))
 	#-------------------------- e2e_lat --------------------------#
 	for key in ['90.0', '95.0', '98.0', '99.0', '99.9']:
 		assert len(raw_sys_data['e2e_lat'][key]) == CnnTimeSteps
@@ -272,7 +176,7 @@ def _predict(info):
 		else:
 			lat_data = np.vstack((lat_data, e2e_lat))
 
-	logging.info('lat_data.shape = ' + str(lat_data.shape))
+	#logging.info('lat_data.shape = ' + str(lat_data.shape))
 
 	#-------------------------- next_info --------------------------#
 	ncore_next = None
@@ -312,33 +216,13 @@ def _predict(info):
 						ncore_proposal_next_k.reshape(
 							[1, ncore_proposal_next_k.shape[0], ncore_proposal_next_k.shape[1]])))
 
-			# rps_next = np.vstack((rps_next, rps_proposal.reshape([1, rps_proposal.shape[0]])))
-			# rps_next_k = np.vstack((rps_next_k, 
-			# 			rps_proposal_next_k.reshape(
-			# 				[1, rps_proposal_next_k.shape[0], rps_proposal_next_k.shape[1]])))
 
-	# ncore_next = ncore_next.reshape([ncore_next.shape[0], 1, ncore_next.shape[1]])
-	# ncore_next_k = ncore_next_k.reshape(
-	# 				[ncore_next_k.shape[0], 1, ncore_next_k.shape[1], ncore_next_k.shape[2]])
-	# rps_next = rps_next.reshape([rps_next.shape[0], 1, rps_next.shape[1]])
-	# rps_next_k = rps_next_k.reshape(
-	# 				[rps_next_k.shape[0], 1, rps_next_k.shape[1], rps_next_k.shape[2]])
-	
-	# compose next_info
-	'''
-	print ncore_next.shape
-	print ncore_next_k.shape
-	print rps_next.shape
-	print rps_next_k.shape
-	'''
-	# next_data = np.concatenate((ncore_next, rps_next), axis=1)
-	# next_k_data = np.concatenate((ncore_next_k, rps_next_k),axis=1)
 
 	next_data = ncore_next
 	next_k_data = ncore_next_k
 
-	logging.info('next_data.shape = ' + str(next_data.shape))
-	logging.info('next_k_data.shape = ' + str(next_k_data.shape))
+	#logging.info('next_data.shape = ' + str(next_data.shape))
+	#logging.info('next_k_data.shape = ' + str(next_k_data.shape))
 
 	pred_data  = {'data1':sys_data, 'data2':lat_data, 'data3':next_data}
 	pred_iter = mx.io.NDArrayIter(pred_data, batch_size=batch_size)
@@ -414,7 +298,7 @@ def test(rps : int, pod_count: dict, cpu_usage_means : dict):
 	InternalSysState.set_params(load_params[1], load_params[2], allow_missing=True, allow_extra=True)
 
 	BoostTree = xgb.Booster()  # init model
-	print('load ', args.xgb_prefix + str(XgbLookForward) + '.model')
+	#print('load ', args.xgb_prefix + str(XgbLookForward) + '.model')
 	BoostTree.load_model(args.xgb_prefix + str(XgbLookForward) + '.model')  # load data
 
 	info = {}
@@ -450,27 +334,6 @@ def test(rps : int, pod_count: dict, cpu_usage_means : dict):
 	t_s = time.time()
 	pred = _predict(info)
 	return pred
-
-
-def load_usage_and_pods_from_csv(csv_path, rps):
-    df = pd.read_csv(csv_path)
-
-    # Filter the row for the given load value
-    row = df[df['load'] == rps].iloc[0]
-
-    usage_dict = {}
-    pods_dict = {}
-
-    for col in df.columns:
-        if col == 'load':
-            continue
-        value = eval(row[col])  # assuming the value is a stringified tuple like "(0.01, 1)"
-        usage_dict[col] = value[0]
-        pods_dict[col] = value[1]
-
-    return usage_dict, pods_dict
-
-
 
 def main():
 	global Model
@@ -525,10 +388,10 @@ def main():
 	InternalSysState.set_params(load_params[1], load_params[2], allow_missing=True, allow_extra=True)
 
 	BoostTree = xgb.Booster()  # init model
-	logging.info('load ' + args.xgb_prefix + str(XgbLookForward) + '.model')
+	#logging.info('load ' + args.xgb_prefix + str(XgbLookForward) + '.model')
 	BoostTree.load_model(args.xgb_prefix + str(XgbLookForward) + '.model')  # load data
 
-	logging.info('model loaded...')
+	#logging.info('model loaded...')
 
 	local_serv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	local_serv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -537,7 +400,7 @@ def main():
 	host_sock, addr = local_serv_sock.accept()
 	host_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-	logging.info('master connected')
+	#logging.info('master connected')
 
 	MsgBuffer = ''
 	terminate = False
@@ -587,6 +450,7 @@ SERVICE_TIERS = {
     "home-timeline-redis": "Caching & DB",
     "home-timeline-service": "Business Logic",
     "nginx-thrift": "Frontend",
+	"nginx-web-server": "Frontend",
     "post-storage-memcached": "Caching & DB",
     "post-storage-mongodb": "Caching & DB",
     "post-storage-service": "Business Logic",
@@ -613,6 +477,25 @@ SERVICE_TIERS = {
 }
 TIER_LEVEL_LIST = ["Business Logic", "Caching & DB", "Frontend"]
 
+def load_usage_and_pods_from_csv(csv_path, rps):
+    df = pd.read_csv(csv_path)
+
+    # Filter the row for the given load value
+    row = df[df['load'] == rps].iloc[0]
+
+    usage_dict = {}
+    pods_dict = {}
+
+    for col in df.columns:
+        if col == 'load':
+            continue
+        value = eval(row[col])  # assuming the value is a stringified tuple like "(0.01, 1)"
+        usage_dict[col] = value[0]
+        pods_dict[col] = value[1]
+
+    return usage_dict, pods_dict
+
+
 def create_and_save_deployment_config(load, best_action_replicas_dict):
 
 	k8s_json: dict = None
@@ -620,9 +503,12 @@ def create_and_save_deployment_config(load, best_action_replicas_dict):
 		k8s_json = json.loads(f.read())
 
 	#total_replicas = sum([item for item in best_action_replicas_dict.values()])
-
+	# cur_services = [ service['name'] for service in k8s_json["deployments"]]
+	# print('[DEBUG-FIRST] current microservices in json', cur_services)
+	microservice_entries_set = set()
 	for microservice, count in best_action_replicas_dict.items():
 		# create a new dict with the same keys as the json file
+		
 		new_dict = {
 			"name": microservice,
 			"namespace": "socialnetwork",
@@ -632,46 +518,66 @@ def create_and_save_deployment_config(load, best_action_replicas_dict):
 				"limits": {"cpu": "2", "memory": "2Gi"},
 			},
 		}
+		
+		# write the json file to k8s.json
 		# append the dict to the deployments key
-		k8s_json["deployments"].append(new_dict)
+		if microservice == 'nginx-thrift':
+			k8s_json["deployments"].append(new_dict)
 
-	# write the json file to k8s.json
-	with open(f"sinan_deployment_configs/load_{load}_config.json", "w") as f:
+			web_server_dict = {
+			"name":'nginx-web-server',
+			"namespace": "socialnetwork",
+			"replicas": new_dict['replicas'],
+			"resources": {
+				"requests": {"cpu": "2", "memory": "2Gi"},
+				"limits": {"cpu": "2", "memory": "2Gi"},
+				},
+			}
+
+			k8s_json["deployments"].append(web_server_dict)
+		elif microservice != 'jaeger':
+			k8s_json["deployments"].append(new_dict)
+		
+	cur_services = [ service['name'] for service in k8s_json["deployments"]]
+
+	with open(f"updated_sinan_deployment_configs/load_{load}_config.json", "w") as f:
 		f.write(json.dumps(k8s_json, indent=4))
 	
 
 if __name__ == "__main__":	
-	logging.basicConfig(level=logging.INFO,
-		format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+	#logging.basicConfig(level=logging.INFO,
+	#	format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 	QoS_PROB_UPPER_THRESHOLD = 0.8
-	QoS_LATENCY = 200 #ms
-	for load in range (25,701,25): 
-		service_cpu_dict, service_replicas_dict = load_usage_and_pods_from_csv('step_25_ctrl_cpu_pod_tuple.csv', load)
-		e2e_latency, qos_prob = test(load, service_replicas_dict, service_cpu_dict)[0]
-
-		if qos_prob < QoS_PROB_UPPER_THRESHOLD and  e2e_latency < QoS_LATENCY:
+	QoS_VIOLATION = 200 #ms
+	service_cpu_dict, init_service_replicas_dict = load_usage_and_pods_from_csv("/home/shyacinthe/sinan-local/ml_docker_swarm/step_25_ctrl_cpu_pod_tuple.csv", 25)
+	updated_replica_dict = init_service_replicas_dict
+	for load in range (25,701,25): 												
+		e2e_latency, qos_prob = test(load, updated_replica_dict, service_cpu_dict)[0]
+		print("\n[DEBUG] e2e latency = ", e2e_latency, "\t qos pron = ", qos_prob, "\n")
+		if qos_prob < QoS_PROB_UPPER_THRESHOLD and  e2e_latency < QoS_VIOLATION:
 			print("No chance of a QoS violation @ ", load)
-			best_outcome = service_replicas_dict
+			best_outcome = updated_replica_dict
 		else:
 			action_outcomes = []
-			for i, tier in enumerate(TIER_LEVEL_LIST):
-				updated_replica_dict = service_replicas_dict
+			for tier in TIER_LEVEL_LIST:
+				possible_replicas_dict = updated_replica_dict
 				total_pods_added = 0
 				# increment all pod counts of type tier by 1
-				for key in service_replicas_dict.keys():
+				for key in updated_replica_dict.keys():
 					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
-						updated_replica_dict[key] = updated_replica_dict[key] + 1
+						possible_replicas_dict[key] = possible_replicas_dict[key] + 1
 						total_pods_added = total_pods_added + 1
 
-				updated_e2e_latency, updated_qos_prob = test(load, updated_replica_dict, service_cpu_dict)[0] #cpu usage is not 100% accurate
-				action_outcomes.append((tier, total_pods_added ,updated_e2e_latency, updated_qos_prob, updated_replica_dict))
+				updated_e2e_latency, updated_qos_prob = test(load, possible_replicas_dict, service_cpu_dict)[0] #cpu usage is not 100% accurate
+				action_outcomes.append((tier, total_pods_added ,updated_e2e_latency, updated_qos_prob, possible_replicas_dict))
 
 			# determine the best action
 			ranked_outcomes = sorted(action_outcomes, key= lambda x: (x[3], x[1], x[2]))
 			best_outcome = ranked_outcomes[0][4]
 
 		# create a deployment config for this file
+		updated_replica_dict = best_outcome
 		create_and_save_deployment_config(load, best_outcome)
 
 

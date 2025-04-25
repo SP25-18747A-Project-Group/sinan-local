@@ -61,6 +61,21 @@
             }
         },
         {
+            "name": "nginx-thrift",
+            "namespace": "socialnetwork",
+            "replicas": 1,
+            "resources": {
+                "requests": {
+                    "cpu": "2",
+                    "memory": "2.0Gi"
+                },
+                "limits": {
+                    "cpu": "2",
+                    "memory": "2.0Gi"
+                }
+            }
+        },
+        {
             "name": "post-storage-memcached",
             "namespace": "socialnetwork",
             "replicas": 1,
@@ -211,10 +226,9 @@
             }
         },
         {
-<<<<<<< Updated upstream
             "name": "compose-post-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -229,7 +243,7 @@
         {
             "name": "home-timeline-redis",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -244,7 +258,7 @@
         {
             "name": "home-timeline-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -260,11 +274,6 @@
             "name": "jaeger",
             "namespace": "socialnetwork",
             "replicas": 1,
-=======
-            "name": "home-timeline-redis",
-            "namespace": "socialnetwork",
-            "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -322,10 +331,9 @@
             }
         },
         {
-<<<<<<< Updated upstream
             "name": "media-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -340,12 +348,7 @@
         {
             "name": "nginx-thrift",
             "namespace": "socialnetwork",
-            "replicas": 3,
-=======
-            "name": "nginx-thrift",
-            "namespace": "socialnetwork",
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -360,11 +363,7 @@
         {
             "name": "post-storage-memcached",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -379,8 +378,7 @@
         {
             "name": "post-storage-mongodb",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -395,10 +393,7 @@
         {
             "name": "post-storage-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -413,11 +408,7 @@
         {
             "name": "social-graph-mongodb",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -432,8 +423,7 @@
         {
             "name": "social-graph-redis",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -448,7 +438,7 @@
         {
             "name": "social-graph-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -463,7 +453,7 @@
         {
             "name": "text-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -478,10 +468,7 @@
         {
             "name": "unique-id-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -524,10 +511,9 @@
             }
         },
         {
-<<<<<<< Updated upstream
             "name": "url-shorten-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -542,7 +528,7 @@
         {
             "name": "user-memcached",
             "namespace": "socialnetwork",
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -557,12 +543,7 @@
         {
             "name": "user-mention-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
-=======
-            "name": "user-memcached",
-            "namespace": "socialnetwork",
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -577,8 +558,7 @@
         {
             "name": "user-mongodb",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
+            "replicas": 2,
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -593,10 +573,7 @@
         {
             "name": "user-service",
             "namespace": "socialnetwork",
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -611,11 +588,7 @@
         {
             "name": "user-timeline-mongodb",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -630,176 +603,7 @@
         {
             "name": "user-timeline-redis",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
-=======
             "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "compose-post-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "home-timeline-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "media-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "nginx-web-server",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "post-storage-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "social-graph-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "text-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "unique-id-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "url-shorten-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "user-mention-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
-            "name": "user-service",
-            "namespace": "socialnetwork",
-            "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -814,11 +618,7 @@
         {
             "name": "user-timeline-service",
             "namespace": "socialnetwork",
-<<<<<<< Updated upstream
-            "replicas": 3,
-=======
             "replicas": 2,
->>>>>>> Stashed changes
             "resources": {
                 "requests": {
                     "cpu": "2",
@@ -831,8 +631,4 @@
             }
         }
     ]
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
