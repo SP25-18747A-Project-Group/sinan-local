@@ -574,7 +574,7 @@ if __name__ == "__main__":
 				for key in updated_replica_dict.keys():
 					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
 						if (total_pods_before + total_pods_added >= 80):
-							break;
+							break
 						possible_replicas_dict[key] = possible_replicas_dict[key] + 1
 						total_pods_added = total_pods_added + 1
 
