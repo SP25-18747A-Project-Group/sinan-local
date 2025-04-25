@@ -573,8 +573,10 @@ if __name__ == "__main__":
 				# increment all pod counts of type tier by 1
 				for key in updated_replica_dict.keys():
 					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
+						if (total_pods_before + total_pods_added >= 80):
+							break;
 						possible_replicas_dict[key] = possible_replicas_dict[key] + 1
-						if (total_pods_before + total_pods_added < 80): total_pods_added = total_pods_added + 1
+						total_pods_added = total_pods_added + 1
 
 				updated_e2e_latency, updated_qos_prob = test(load, possible_replicas_dict, service_cpu_dict)[0] #cpu usage is not 100% accurate
 				action_outcomes.append((tier, total_pods_added ,updated_e2e_latency, updated_qos_prob, possible_replicas_dict))
