@@ -562,12 +562,19 @@ if __name__ == "__main__":
 			action_outcomes = []
 			for tier in TIER_LEVEL_LIST:
 				possible_replicas_dict = updated_replica_dict
+
+				# Find total current pods allocated
+				total_pods_before = 0
+				for key in updated_replica_dict.keys():
+					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
+						total_pods_before += updated_replica_dict[key]
+
 				total_pods_added = 0
 				# increment all pod counts of type tier by 1
 				for key in updated_replica_dict.keys():
 					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
 						possible_replicas_dict[key] = possible_replicas_dict[key] + 1
-						total_pods_added = total_pods_added + 1
+						if (total_pods_before + total_pods_added < 80): total_pods_added = total_pods_added + 1
 
 				updated_e2e_latency, updated_qos_prob = test(load, possible_replicas_dict, service_cpu_dict)[0] #cpu usage is not 100% accurate
 				action_outcomes.append((tier, total_pods_added ,updated_e2e_latency, updated_qos_prob, possible_replicas_dict))
