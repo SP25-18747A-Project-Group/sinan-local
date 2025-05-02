@@ -121,21 +121,6 @@
             }
         },
         {
-            "name": "nginx-web-server",
-            "namespace": "socialnetwork",
-            "replicas": 2,
-            "resources": {
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
-        },
-        {
             "name": "post-storage-memcached",
             "namespace": "socialnetwork",
             "replicas": 2,

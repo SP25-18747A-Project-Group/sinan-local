@@ -450,7 +450,6 @@ SERVICE_TIERS = {
     "home-timeline-redis": "Caching & DB",
     "home-timeline-service": "Business Logic",
     "nginx-thrift": "Frontend",
-	"nginx-web-server": "Frontend",
     "post-storage-memcached": "Caching & DB",
     "post-storage-mongodb": "Caching & DB",
     "post-storage-service": "Business Logic",
@@ -486,11 +485,11 @@ def load_usage_and_pods_from_csv(csv_path, rps):
     usage_dict = {}
     pods_dict = {}
 
-    for col in df.columns:
+    for i,col in enumerate(df.columns):
         if col == 'load':
             continue
         value = eval(row[col])  # assuming the value is a stringified tuple like "(0.01, 1)"
-        usage_dict[col] = value[0]
+        usage_dict[col] = value[0] #+ 0.01 * i
         pods_dict[col] = value[1]
 
     return usage_dict, pods_dict
@@ -519,28 +518,12 @@ def create_and_save_deployment_config(load, best_action_replicas_dict):
 			},
 		}
 		
-		# write the json file to k8s.json
-		# append the dict to the deployments key
-		if microservice == 'nginx-thrift':
-			k8s_json["deployments"].append(new_dict)
-
-			web_server_dict = {
-			"name":'nginx-web-server',
-			"namespace": "socialnetwork",
-			"replicas": new_dict['replicas'],
-			"resources": {
-				"requests": {"cpu": "2", "memory": "2Gi"},
-				"limits": {"cpu": "2", "memory": "2Gi"},
-				},
-			}
-
-			k8s_json["deployments"].append(web_server_dict)
-		elif microservice != 'jaeger':
+		if microservice != 'jaeger':
 			k8s_json["deployments"].append(new_dict)
 		
 	cur_services = [ service['name'] for service in k8s_json["deployments"]]
 
-	with open(f"updated_sinan_deployment_configs/load_{load}_config.json", "w") as f:
+	with open(f"sensitivity_configs/load_{load}_config.json", "w") as f:
 		f.write(json.dumps(k8s_json, indent=4))
 	
 
@@ -554,7 +537,7 @@ if __name__ == "__main__":
 	updated_replica_dict = init_service_replicas_dict
 	for load in range (25,701,25): 												
 		e2e_latency, qos_prob = test(load, updated_replica_dict, service_cpu_dict)[0]
-		print("\n[DEBUG] e2e latency = ", e2e_latency, "\t qos pron = ", qos_prob, "\n")
+		print("\n[DEBUG] e2e latency = ", e2e_latency, "\t qos prob = ", qos_prob, "\n")
 		if qos_prob < QoS_PROB_UPPER_THRESHOLD and  e2e_latency < QoS_VIOLATION:
 			print("No chance of a QoS violation @ ", load)
 			best_outcome = updated_replica_dict
@@ -564,16 +547,13 @@ if __name__ == "__main__":
 				possible_replicas_dict = updated_replica_dict
 
 				# Find total current pods allocated
-				total_pods_before = 0
-				for key in updated_replica_dict.keys():
-					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
-						total_pods_before += updated_replica_dict[key]
-
+				total_pods_before = sum(updated_replica_dict.values())
 				total_pods_added = 0
 				# increment all pod counts of type tier by 1
 				for key in updated_replica_dict.keys():
 					if key in SERVICE_TIERS and SERVICE_TIERS[key] == tier:
-						if (total_pods_before + total_pods_added >= 80):
+						if (total_pods_before + total_pods_added >= 55):
+							print("\n\n[DEBUG] Max pod cound hit = ", total_pods_before + total_pods_added , " \n\n ")
 							break
 						possible_replicas_dict[key] = possible_replicas_dict[key] + 1
 						total_pods_added = total_pods_added + 1
